@@ -2,15 +2,7 @@
 
 const   express     = require('express'),
         router      = express.Router(),
-        magic       = require('../util/magic'),
-        users       = require('../domain/services/service-user');
-
-console.log('[[ USERS ]]'); 
-magic.LogInfo('[GET] = /users/')
-magic.LogInfo('[GET] = /users/:id')
-magic.LogSuccess('[POST] = /users/')
-magic.LogWarning('[PATCH] = /users/:id')
-magic.LogDanger('[DELETE] = /users/:id')
+        users       = require('../domain/interactors/service-user');
 
 router.get('/users/', users.GetAll);
 router.get('/users/:id', users.GetById);

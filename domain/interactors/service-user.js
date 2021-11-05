@@ -1,23 +1,24 @@
-const magic = require('../../util/magic');
+const logger = require('../../util/logger');
 const enum_ = require('../../util/enum');
-const ormUser = require('../orm/orm-user');
+const ormUser = require('../adapters/orm-user');
 const { isUuid } = require('uuidv4');
 
+let user = new ormUser();
 
 exports.GetAll = async (req, res) =>{
     let status = 'Success', errorCode ='', message='', data='', statusCode=0, resp={};
     try{
-        respOrm = await ormUser.GetAll();
+        respOrm = await user.GetAll();
         if(respOrm.err){
             status = 'Failure', errorCode = respOrm.err.code, message = respOrm.err.messsage, statusCode = enum_.CODE_BAD_REQUEST;
         }else{
             message = 'Success Response', data = respOrm, statusCode = data.length > 0 ? enum_.CODE_OK : enum_.CODE_NO_CONTENT;
         }
-        resp = await magic.ResponseService(status,errorCode,message,data);
+        resp = await logger.ResponseService(status,errorCode,message,data);
         return res.status(statusCode).send(resp);
     } catch(err) {
         console.log("err = ", err);
-        resp = await magic.ResponseService('Failure',enum_.CRASH_LOGIC,err,'');
+        resp = await logger.ResponseService('Failure',enum_.CRASH_LOGIC,err,'');
         return res.status(enum_.CODE_INTERNAL_SERVER_ERROR).send(resp);
     }
 }
@@ -27,7 +28,7 @@ exports.GetById = async (req, res) =>{
     try{
         const id = req.params.id;
         if(isUuid(id)){
-            respOrm = await ormUser.GetById(id);
+            respOrm = await user.GetById(id);
             if(respOrm && respOrm.err){
                 status = 'Failure', errorCode = respOrm.err.code, message = respOrm.err.messsage, statusCode = enum_.CODE_BAD_REQUEST;
             }else{
@@ -40,11 +41,11 @@ exports.GetById = async (req, res) =>{
         }else{
             status = 'Failure', errorCode = enum_.FAIL_CONVERTED_UUID_TO_STRING, message = 'Error trying convert uuid to string', statusCode = enum_.CODE_BAD_REQUEST;
         }
-        resp = await magic.ResponseService(status,errorCode,message,data);
+        resp = await logger.ResponseService(status,errorCode,message,data);
         return res.status(statusCode).send(resp);
     } catch(err) {
         console.log("err = ", err);
-        return res.status(enum_.CODE_INTERNAL_SERVER_ERROR).send(await magic.ResponseService('Failure',enum_.CRASH_LOGIC,err,''));
+        return res.status(enum_.CODE_INTERNAL_SERVER_ERROR).send(await logger.ResponseService('Failure',enum_.CRASH_LOGIC,err,''));
     }
 }
 
@@ -56,7 +57,7 @@ exports.Store = async (req, res) =>{
         const LastName = req.body.LastName;
         const Age = req.body.Age;
         if( Name && LastName && Age ){
-            respOrm = await ormUser.Store( Name, LastName, Age );
+            respOrm = await user.Store( Name, LastName, Age );
             if(respOrm.err){
                 status = 'Failure', errorCode = respOrm.err.code, message = respOrm.err.messsage, statusCode = enum_.CODE_BAD_REQUEST;
             }else{
@@ -65,11 +66,11 @@ exports.Store = async (req, res) =>{
         }else{
             status = 'Failure', errorCode = enum_.ERROR_REQUIRED_FIELD, message = 'All fields are required', statusCode = enum_.CODE_BAD_REQUEST;
         }
-        resp = await magic.ResponseService(status,errorCode,message,data)
+        resp = await logger.ResponseService(status,errorCode,message,data)
         return res.status(statusCode).send(resp);
     } catch(err) {
         console.log("err = ", err);
-        return res.status(enum_.CODE_INTERNAL_SERVER_ERROR).send(await magic.ResponseService('Failure',enum_.CRASH_LOGIC,'err',''));
+        return res.status(enum_.CODE_INTERNAL_SERVER_ERROR).send(await logger.ResponseService('Failure',enum_.CRASH_LOGIC,'err',''));
     }
 }
 
@@ -82,7 +83,7 @@ exports.UpdateById = async (req, res) =>{
             const LastName = req.body.LastName;
             const Age = req.body.Age;
             if( Name && LastName && Age ){
-                respOrm = await ormUser.UpdateById( Name, LastName, Age, id );
+                respOrm = await user.UpdateById( Name, LastName, Age, id );
                 if(respOrm.err){
                     status = 'Failure', errorCode = respOrm.err.code, message = respOrm.err.messsage, statusCode = enum_.CODE_BAD_REQUEST;
                 }else{
@@ -94,11 +95,11 @@ exports.UpdateById = async (req, res) =>{
         }else{
             status = 'Failure', errorCode = enum_.FAIL_CONVERTED_UUID_TO_STRING, message = 'Error trying convert uuid to string', statusCode = enum_.CODE_BAD_REQUEST;
         }
-        resp = await magic.ResponseService(status,errorCode,message,data)
+        resp = await logger.ResponseService(status,errorCode,message,data)
         return res.status(statusCode).send(resp);
     } catch(err) {
         console.log("err = ", err);
-        return res.status(enum_.CODE_INTERNAL_SERVER_ERROR).send(await magic.ResponseService('Failure',enum_.CRASH_LOGIC,err,''));
+        return res.status(enum_.CODE_INTERNAL_SERVER_ERROR).send(await logger.ResponseService('Failure',enum_.CRASH_LOGIC,err,''));
     }
 }
 exports.DeleteById = async (req, res) =>{
@@ -106,7 +107,7 @@ exports.DeleteById = async (req, res) =>{
     try{
         const id = req.params.id;
         if(isUuid(id)){
-            respOrm = await ormUser.DeleteById(id);
+            respOrm = await user.DeleteById(id);
             if(respOrm.err){
                 status = 'Failure', errorCode = respOrm.err.code, message = respOrm.err.messsage, statusCode = enum_.CODE_BAD_REQUEST;
             }else{
@@ -115,10 +116,10 @@ exports.DeleteById = async (req, res) =>{
         }else{
             status = 'Failure', errorCode = enum_.FAIL_CONVERTED_UUID_TO_STRING, message = 'Error trying convert uuid to string', statusCode = enum_.CODE_BAD_REQUEST;
         }
-        resp = await magic.ResponseService(status,errorCode,message,data)
+        resp = await logger.ResponseService(status,errorCode,message,data)
         return res.status(statusCode).send(resp);
     } catch(err) {
         console.log("err = ", err);
-        return res.status(enum_.CODE_INTERNAL_SERVER_ERROR).send(await magic.ResponseService('Failure',enum_.CRASH_LOGIC,err,''));
+        return res.status(enum_.CODE_INTERNAL_SERVER_ERROR).send(await logger.ResponseService('Failure',enum_.CRASH_LOGIC,err,''));
     }
 }
