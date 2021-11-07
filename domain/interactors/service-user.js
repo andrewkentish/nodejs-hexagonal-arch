@@ -1,9 +1,13 @@
 const logger = require('../../util/logger');
 const enum_ = require('../../util/enum');
 const ormUser = require('../adapters/orm-user');
+const fileUser = require('../adapters/file-user');
+const mqUser = require('../adapters/mq-user');
 const { isUuid } = require('uuidv4');
 
 let user = new ormUser();
+let fUser = new fileUser();
+let mq = new mqUser();
 
 exports.GetAll = async (req, res) =>{
     let status = 'Success', errorCode ='', message='', data='', statusCode=0, resp={};
@@ -52,18 +56,18 @@ exports.GetById = async (req, res) =>{
 
 exports.Store = async (req, res) =>{
     let status = 'Success', errorCode ='', message='', data='', statusCode=0, resp={};
-    try{
+    try {
         const Name = req.body.Name;
         const LastName = req.body.LastName;
         const Age = req.body.Age;
         if( Name && LastName && Age ){
-            respOrm = await user.Store( Name, LastName, Age );
-            if(respOrm.err){
+            respOrm = await fUser.Store( Name, LastName, Age );
+            if (respOrm.err){
                 status = 'Failure', errorCode = respOrm.err.code, message = respOrm.err.messsage, statusCode = enum_.CODE_BAD_REQUEST;
-            }else{
+            } else {
                 message = 'User created', statusCode = enum_.CODE_CREATED;
             }
-        }else{
+        } else {
             status = 'Failure', errorCode = enum_.ERROR_REQUIRED_FIELD, message = 'All fields are required', statusCode = enum_.CODE_BAD_REQUEST;
         }
         resp = await logger.ResponseService(status,errorCode,message,data)

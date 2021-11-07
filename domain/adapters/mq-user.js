@@ -35,9 +35,9 @@ module.exports = class mqUser extends UserSource {
   }
 
   // Define some functions that will be used from the main flow
-  putMessage(hObj) {
+  putMessage(hObj, user) {
 
-      var msg = "Hello from Node at " + new Date();
+      var msg = JSON.stringify(user);
     
       var mqmd = new mq.MQMD(); // Defaults are fine.
       var pmo = new mq.MQPMO();
@@ -75,8 +75,14 @@ module.exports = class mqUser extends UserSource {
     });
   }
 
-  Store = function(Name, LastName, Age) {
-    mq.Connx(qMgr, cno, function(err,hConn) {
+  Store = async ( Name, LastName, Age ) =>{
+    const newUser = {  
+      name: Name,
+      lastName: LastName,
+      age: Age
+    };
+
+    return await mq.Connx(qMgr, cno, function(err,hConn) {
       if (err) {
         console.log(formatErr(err));
       } else {
@@ -92,7 +98,7 @@ module.exports = class mqUser extends UserSource {
             console.log(formatErr(err));
           } else {
             console.log("MQOPEN of %s successful",qName);
-            putMessage(hObj);
+            putMessage(hObj, newUser);
           }
           cleanup(hConn,hObj);
         });
